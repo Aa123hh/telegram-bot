@@ -1,7 +1,7 @@
 from telegram.ext import Application, CommandHandler
 import os
 
-TOKEN = os.getenv("8385788660:AAFvcYKGT7ECzlIPqxAmO0XVad1UnCGYMMg")
+TOKEN = os.getenv("token")
 
 async def start(update, context):
     await update.message.reply_text("البوت شغال ✅")
