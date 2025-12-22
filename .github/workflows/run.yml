@@ -1,6 +1,8 @@
-name: Run Telegram Bot
+name: Telegram Bot
 
 on:
+  push:
+    branches: [ "main" ]
   workflow_dispatch:
 
 jobs:
@@ -8,16 +10,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Download code
-        uses: actions/checkout@v3
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Setup Python
-        uses: actions/setup-python@v4
+      - name: Set up Python
+        uses: actions/setup-python@v5
         with:
-          python-version: '3.10'
+          python-version: "3.10"
 
-      - name: Install libraries
+      - name: Install dependencies
         run: pip install -r requirements.txt
 
       - name: Run bot
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: python bot.py
