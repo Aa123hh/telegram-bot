@@ -7,8 +7,7 @@ services:
     # No inbound ports are published by the bot.
     network_mode: host
     env_file:
-      - path: .env
-        required: true
+      - .env
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=16m
