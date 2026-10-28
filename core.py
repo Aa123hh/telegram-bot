@@ -75,7 +75,7 @@ def validate_url(url: str, *, allow_internal_http: bool = False) -> None:
     if not allow_internal_http:
         raise ConfigurationError("Non-loopback HTTP requires explicit ALLOW_INTERNAL_HTTP=true")
     # The option is for explicitly configured private Docker/host networking only.
-    if host.endswith(".local") or host.replace("-", "").isalnum():
+    if host in {"brain", "alwathiq-brain"}:
         return
     try:
         if ipaddress.ip_address(host).is_private:
