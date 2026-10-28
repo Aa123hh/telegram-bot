@@ -1,0 +1,20 @@
+services:
+  alwathiq-telegram:
+    build: .
+    image: alwathiq-telegram:local
+    restart: unless-stopped
+    # Linux host networking allows the bot to reach a BRAIN API on 127.0.0.1.
+    # No inbound ports are published by the bot.
+    network_mode: host
+    env_file:
+      - .env
+    read_only: true
+    tmpfs:
+      - /tmp:rw,noexec,nosuid,size=16m
+    security_opt:
+      - no-new-privileges:true
+    cap_drop: [ALL]
+    pids_limit: 64
+    mem_limit: 256m
+    cpus: 0.5
+    stop_grace_period: 30s
