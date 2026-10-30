@@ -18,7 +18,7 @@ logging.getLogger("telegram").setLevel(logging.WARNING)
 LOG = logging.getLogger("alwathiq.telegram")
 
 HELP = (
-    "ALWATHIQ-NET | المراقبة فقط\n"
+    "ALWATHIQ-NET | المراقبة وإدارة اختيارية مقيدة\n"
     "/status — جاهزية نواة التشخيص\n"
     "/router — موارد جهاز الاختبار المرتبط بالنواة\n"
     "/pppoe — عدد جلسات PPPoE من المصدر المعتمد\n"
