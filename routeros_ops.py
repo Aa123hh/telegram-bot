@@ -30,6 +30,17 @@ READ_PATHS = frozenset({
     "/rest/ip/hotspot/user", "/rest/ip/hotspot/active",
 })
 POST_PATHS = frozenset({"/rest/ping", "/rest/system/backup/save", "/rest/system/reboot"})
+# Projection prevents RouterOS from returning PPP/Hotspot passwords to the bot.
+READ_FIELDS = {
+    "/rest/system/resource": "uptime,cpu-load,free-memory,total-memory,version",
+    "/rest/interface": ".id,name,running,disabled,type,rx-byte,tx-byte",
+    "/rest/interface/l2tp-client": ".id,name,running,disabled,connect-to",
+    "/rest/ppp/secret": ".id,name,profile,disabled,service",
+    "/rest/ppp/active": ".id,name,service,uptime,address",
+    "/rest/ppp/profile": "name,rate-limit",
+    "/rest/ip/hotspot/user": ".id,name,profile,disabled",
+    "/rest/ip/hotspot/active": ".id,user,uptime,address",
+}
 TABLES = {
     "ppp": "/rest/ppp/secret",
     "ppp_active": "/rest/ppp/active",
@@ -139,7 +150,11 @@ class RouterOSClient:
         if path in {"/rest/system/reboot", "/rest/system/backup/save"} and not self.config.critical_enabled:
             raise RouterError("الأوامر الحرجة معطّلة في الإعدادات.")
         try:
-            response = await self._client.request(method, path, json=data if method != "GET" else None)
+            response = await self._client.request(
+                method, path,
+                params={".proplist": READ_FIELDS[path]} if method == "GET" else None,
+                json=data if method != "GET" else None,
+            )
             if response.status_code not in {200, 201, 202, 204}:
                 raise RouterError(f"رفض الراوتر الطلب (HTTP {response.status_code}).")
             if len(response.content) > 262144:
