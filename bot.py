@@ -7,6 +7,8 @@ from telegram import Update
 from telegram.ext import Application, CommandHandler, ContextTypes
 
 from core import BrainClient, BrainError, ConfigurationError, RateGate, Settings, summarize_diagnostic
+from routeros_bot import install_router_handlers
+from routeros_ops import RouterConfigError
 
 logging.basicConfig(
     format="%(asctime)s %(levelname)s %(name)s %(message)s", level=logging.INFO
@@ -22,7 +24,11 @@ HELP = (
     "/pppoe — عدد جلسات PPPoE من المصدر المعتمد\n"
     "/incidents — ملخص الحوادث\n"
     "/help — قائمة الأوامر\n"
-    "لا توجد أوامر تعديل أو إعادة تشغيل أو قطع اشتراكات."
+    "أوامر MikroTik الإضافية: /resource /interfaces /traffic /vpn /ping IP\n"
+    "/listpppoe /activepppoe /profiles /listhotspot /activehotspot\n"
+    "للمالك فقط وبعد التفعيل: /disablepppoe /enablepppoe /delpppoe /kickpppoe username\n"
+    "/disablehotspot /enablehotspot /delhotspot username /backup /reboot ثم /confirm code\n"
+    "إنشاء حسابات جديدة وإرسال كلمات المرور غير متاحين عبر تلغرام."
 )
 
 
@@ -114,6 +120,9 @@ async def error_handler(update: object, context: ContextTypes.DEFAULT_TYPE) -> N
 async def post_shutdown(application: Application) -> None:
     client: BrainClient = application.bot_data["client"]
     await client.aclose()
+    router_client = application.bot_data.get("router_client")
+    if router_client is not None:
+        await router_client.aclose()
 
 
 def make_application(settings: Settings) -> Application:
@@ -126,6 +135,7 @@ def make_application(settings: Settings) -> Application:
         ("router", router), ("pppoe", pppoe), ("incidents", incidents)
     ):
         app.add_handler(CommandHandler(name, handler))
+    install_router_handlers(app, settings)
     app.add_error_handler(error_handler)
     return app
 
@@ -136,7 +146,11 @@ def main() -> None:
     except ConfigurationError as exc:
         raise SystemExit("Invalid bot configuration: " + str(exc)) from None
     LOG.info("Starting ALWATHIQ-NET bot with private-chat allowlist enabled")
-    make_application(settings).run_polling(
+    try:
+        app = make_application(settings)
+    except RouterConfigError as exc:
+        raise SystemExit("Invalid RouterOS configuration: " + str(exc)) from None
+    app.run_polling(
         drop_pending_updates=True,
         allowed_updates=[Update.MESSAGE],
         poll_interval=1.0,
