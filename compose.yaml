@@ -8,6 +8,9 @@ services:
     network_mode: host
     env_file:
       - .env
+    # Mount only CA certificates, not private keys. Create ./routeros-certs on the host.
+    volumes:
+      - ./routeros-certs:/etc/alwathiq/ca:ro
     read_only: true
     tmpfs:
       - /tmp:rw,noexec,nosuid,size=16m

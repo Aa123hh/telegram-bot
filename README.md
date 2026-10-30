@@ -1,8 +1,13 @@
 # ALWATHIQ-NET Telegram Bot
 
-Production-oriented, **read-only** Telegram control plane for the ALWATHIQ-NET BRAIN API. This repository is a separate bot service; it does not change PostgreSQL, SAS4, RADIUS or MikroTik configuration.
+Production-oriented Telegram control plane with **read-only default and optional, owner-gated RouterOS operations** for the ALWATHIQ-NET BRAIN API. This repository is a separate bot service; it does not change PostgreSQL, SAS4, RADIUS or MikroTik configuration.
 
 ## Current functions
+
+This branch adds independently written RouterOS 7 HTTPS REST commands for `/resource`, `/interfaces`, `/traffic`, `/vpn`, `/ping`, `/listpppoe`, `/activepppoe`, `/profiles`, `/listhotspot` and `/activehotspot`. It also stages owner-only `/disablepppoe`, `/enablepppoe`, `/delpppoe`, `/kickpppoe`, equivalent Hotspot controls, `/backup`, and `/reboot` behind explicit disabled-by-default flags and single-use confirmations.
+
+**Important:** adding new users, publishing VPN credentials, and distributing subscriber passwords in Telegram are **not implemented**. All live router operations require separately configured RouterOS HTTPS access; BRAIN remains read-only. Full installation, safety and acceptance details: [RouterOS operations](docs/ROUTEROS_OPERATIONS.md).
+
 
 - Private-chat-only authorization by fixed Telegram numeric user IDs.
 - `/start`, `/help`: bot command menu.
@@ -12,7 +17,7 @@ Production-oriented, **read-only** Telegram control plane for the ALWATHIQ-NET B
 - `/incidents`: bounded incident-page summary, no raw evidence or subscriber details.
 - A missing or unconfigured integration is reported as such, never as healthy.
 
-No dynamic RouterOS command execution, no passwords sent to Telegram, no reboot, no PPP account creation, no cut-off, no balance changes, and no SAS4 access. The bot does **not** connect directly to a router or to a database.
+No dynamic RouterOS command or shell execution, no passwords sent to Telegram, no PPP account creation, no balance changes, and no SAS4 access. Direct RouterOS HTTPS REST access is **optional** and absent until separately configured. RouterOS writes, backup and reboot remain opt-in, confirmed and **not authorized for production deployment by this code review**.
 
 ## Safe installation on Ubuntu (Docker Compose)
 
@@ -60,7 +65,7 @@ For live access, use a separate least-privilege source approved by the infrastru
 python3.12 -m venv .venv
 . .venv/bin/activate
 pip install -r requirements.txt
-python -m compileall -q bot.py core.py tests
+python -m compileall -q bot.py core.py routeros_ops.py routeros_bot.py tests
 python -m unittest discover -s tests -v
 ```
 
@@ -68,4 +73,4 @@ GitHub Actions runs only offline tests and compilation. Its success is not proof
 
 ## Deployment status
 
-The repository contains deployable code and a repeatable container definition. **No actual Ubuntu deployment, successful Telegram poll, MikroTik read, or BRAIN integration is implied by this source repository.**
+The repository contains candidate code and a repeatable container definition; writes are disabled by default. **No actual Ubuntu deployment, successful Telegram poll, MikroTik read, or BRAIN integration is implied by this source repository.**

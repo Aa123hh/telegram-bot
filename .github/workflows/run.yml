@@ -23,6 +23,6 @@ jobs:
       - name: Install pinned dependencies
         run: python -m pip install -r requirements.txt
       - name: Compile all application and test files
-        run: python -m compileall -q bot.py core.py tests
+        run: python -m compileall -q bot.py core.py routeros_ops.py routeros_bot.py tests
       - name: Run offline security and contract tests
         run: python -m unittest discover -s tests -v
